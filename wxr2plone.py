@@ -45,7 +45,8 @@ from Testing.makerequest import makerequest
 USERID_MAPPING = {
     'admin': 'admin',
 }
-filename = 'my.wordpress.2013-06-29.xml'
+FILENAME = 'my.wordpress.2013-06-29.xml'
+TYPES = ['page','post','info','story',]
 # A target container name; e.g. 'news'
 # Leave set to 'None' to create an import folder with a generic name
 TARGET = None
@@ -142,7 +143,7 @@ class Importer(object):
         return container
 
     def read_posts(self):
-        tree = ET.parse(filename)
+        tree = ET.parse(FILENAME)
         root = tree.getroot()
         items = root._children[0].findall('item')
         rows = []
@@ -153,16 +154,16 @@ class Importer(object):
             excerpt = item.find('{http://wordpress.org/export/1.2/excerpt/}encoded').text
             date = item.find('{http://wordpress.org/export/1.2/}post_date').text
             creator = item.find('{http://purl.org/dc/elements/1.1/}creator').text
-            title = item.find('{http://wordpress.org/export/1.2/}post_name').text
+            post_name = item.find('{http://wordpress.org/export/1.2/}post_name').text
             id = item.find('{http://wordpress.org/export/1.2/}post_id').text
             type = item.find('{http://wordpress.org/export/1.2/}post_type').text
             try:
                 attachment_url = item.find('{http://wordpress.org/export/1.2/}attachment_url').text
             except:
                 attachment_url = ""
-            rows.append([id,creator,date,text,title,type,attachment_url])
+            rows.append([id,creator,date,text,post_name,title,type,attachment_url])
         
-        headers = ['id', 'creator', 'date', 'text', 'title','type','attachment_url']
+        headers = ['id', 'creator', 'date', 'text', 'post_name','title','type','attachment_url']
 
         #rows = cur.fetchall()
         results = [dict(zip(headers, row)) for row in rows]
@@ -199,7 +200,7 @@ class Importer(object):
 
         used_ids = []
         for p in posts:
-            short = self.normalizer.normalize(p['title'])
+            short = self.normalizer.normalize(p['post_name'])
             if short in used_ids:
                 short = "%s-1" % short
             p.update({
@@ -217,6 +218,7 @@ class Importer(object):
             if p['type'] == 'attachment': continue
             post = context[context.invokeFactory('News Item', p['short'])]
             creator = p['creator']
+            post.setTitle(p['title']) 
             post.setCreators(USERID_MAPPING.get(creator, creator))
             post.setEffectiveDate(DateTime(p['date']))
             try:

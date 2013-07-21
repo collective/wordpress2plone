@@ -48,7 +48,7 @@ The script will do the following:
 Usage of wxr2plone.py
 --------------------------
 
-Before running, open the script in an editor and modify the 'filename'. This refers to the wordpress WXR xml file.
+Before running, open the script in an editor and modify the 'FILENAME'. This refers to the wordpress WXR xml file.
 
 The script will create a temporary directory (e.g.
 "wp-import-wp-import-2012-03-30t13-28-12-180396" and start creating content
